@@ -1,12 +1,19 @@
 package kr.apo2073.utils
 
+import com.google.gson.JsonParser
+import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
 
 object GithubUTILS {
     private const val GITHUB_API="https://api.github.com"
 
-    private const val GITHUB_TOKEN="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"
+    private val GITHUB_TOKEN: String by lazy {
+        val classLoader = this::class.java.classLoader
+        val resource = classLoader.getResource("TOKEN")
+            ?: throw IllegalArgumentException("TOKEN file not found in resources")
+        resource.readText().trim()
+    }
     
     private const val KEY_ASSETS = "assets"
     private const val KEY_NAME = "name"
@@ -21,12 +28,35 @@ object GithubUTILS {
     fun getLatestRELEASE(user: String, repo:String):String {
         return "$GITHUB_API/$KEY_REPO/$user/$repo/releases/latest"
     }
+
+    fun getUserRepos(user: String): List<String> {
+        val url = "$GITHUB_API/$KEY_USERS/$user/$KEY_REPO"
+        val response = fetchData(url)
+        val jsonArray = JsonParser.parseString(response).asJsonArray
+        val repoNames = mutableListOf<String>()
+
+        for (jsonElement in jsonArray) {
+            val repoObject = jsonElement.asJsonObject
+            repoNames.add(repoObject["name"].asString)
+        }
+
+        return repoNames
+    }
+    
     fun getLatestReleaseTag(user: String, repo:String): String {
         val json=JsonGenerator()
             .ToJsonObject(fetchData(getLatestRELEASE(user, repo)))
         return json.get(KEY_TAG_NAME).asString
     }
-
+    
+    fun downloadLatest(user: String, repo: String, file:File) {
+        val json=JsonGenerator()
+            .ToJsonObject(fetchData(getLatestRELEASE(user, repo)))
+        val downloadURL=URL(json.get(KEY_ASSETS)
+            .asJsonObject[KEY_BROWSER_DOWNLOAD_URL].asString)
+        
+    }
+    
     fun fetchData(url: String): String {
         return URL(url).httpRequest {
             requestMethod = "GET"
