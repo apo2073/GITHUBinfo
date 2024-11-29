@@ -10,6 +10,7 @@ fun main() {
 
     println("Enter the GitHub username:")
     val owner = scanner.next()
+    if (owner=="stop") return
 
     println("Choose an option:")
     println("1. List user repositories\n2. Get latest release info\n3. Download latest release asset")
@@ -19,7 +20,9 @@ fun main() {
         1 -> {
             val repos = GithubUTILS.getUserRepos(owner)
             println("Repositories:")
-            repos.forEach { println(it) }
+            print("|| ")
+            repos.forEach { print("$it || ") }
+            println()
         }
         2 -> {
             println("Enter repository name:")
@@ -37,4 +40,5 @@ fun main() {
         }
         else -> println("Invalid option.")
     }
+    main()
 }

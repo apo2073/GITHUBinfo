@@ -9,10 +9,7 @@ object GithubUTILS {
     private const val GITHUB_API="https://api.github.com"
 
     private val GITHUB_TOKEN: String by lazy {
-        val classLoader = this::class.java.classLoader
-        val resource = classLoader.getResource("TOKEN")
-            ?: throw IllegalArgumentException("TOKEN file not found in resources")
-        resource.readText().trim()
+        object {}.javaClass.getResource("TOKEN")?.readText()?.trim() ?: ""
     }
     
     private const val KEY_ASSETS = "assets"
